@@ -14,7 +14,7 @@ class OrderPage {
             cy.get('#submit-creation-form')
     };
 
-
+// remplir les informations  de reception
     saisirAdresse(adresse) {
         this.elementsOrder.addressInput()
             .type(adresse, { force: true });

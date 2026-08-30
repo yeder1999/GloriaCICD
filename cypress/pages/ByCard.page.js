@@ -11,13 +11,12 @@ class CartPage {
             cy.get('#submit-validation-form')
     };
 
-
+// acceptation des conditions 
     accepterConditions() {
         this.elementsCart.acceptCheckbox()
             .click();
     }
-
-
+// methode valider paiement 
     cliquerPayer() {
         this.elementsCart.payButton()
             .click();

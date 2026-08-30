@@ -1,6 +1,7 @@
 ///<reference types="cypress"/>
 
 class ShoppingPage {
+    // effectuer un shop
 
     elementsShopping = {
 

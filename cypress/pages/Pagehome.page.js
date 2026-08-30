@@ -1,6 +1,7 @@
 ///<reference types="cypress"/>
 
 class HomePage {
+    // effectuer une inscription
 
     elementsHome = {
         accountButton: () =>

@@ -1,6 +1,7 @@
 ///<reference types="cypress"/>
 
 class SignupPage {
+    // sign up et remplir les infrmations
 
     elementsSignup = {
 

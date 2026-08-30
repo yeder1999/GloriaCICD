@@ -100,7 +100,7 @@ describe('Parcours inscription et commande', () => {
         // INFORMATIONS COMMANDE
         // =========================================
 
-        OrderPage.saisirAdresse('123');
+        OrderPage.saisirAdresse('146');
 
         OrderPage.saisirTelephone(
             faker.phone.number({
