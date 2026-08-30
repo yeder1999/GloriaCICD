@@ -1,0 +1,29 @@
+pipeline {
+    agent {
+        docker {
+            image 'cypress/included:14.5.4'
+            args '-u root --entrypoint='
+        }
+    }
+
+    stages {
+        stage('installer les dependances necessaires') {
+            steps {
+                sh 'npm ci'
+            }
+        }
+
+        stage('lancement des tests') {
+            steps {
+                sh 'npx cypress run '
+            }
+        }
+
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'allure-results/**,allure-report/**,cypress/screenshots/**,cypress/videos/**', allowEmptyArchive: true
+        }
+    }
+}
