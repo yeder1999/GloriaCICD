@@ -48,11 +48,11 @@ describe('Parcours inscription et commande', () => {
         SignupPage.saisirConfirmationEmail(email);
 
         SignupPage.saisirMotDePasse(
-            'ICEcream123@'
+            'CreamGlory146@'
         );
 
         SignupPage.saisirDateNaissance(
-            '01011990'
+            '26061999'
         );
 
         SignupPage.accepterConditions();
