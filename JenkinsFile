@@ -1,30 +1,110 @@
 pipeline {
-    agent {
-        //une image Docker dans Jenkins pour avoir un environnement contrôlé, isolé et reproductible
-        docker {
-            image 'cypress/included:14.5.4'
-            args '-u root --entrypoint='
-        }
+    agent any
+
+    // Option permettant de choisir si le rapport Allure doit être généré
+    parameters {
+        booleanParam(
+            name: 'GENERATE_ALLURE',
+            defaultValue: false,
+            description: 'Activer la génération du rapport Allure'
+        )
     }
 
     stages {
-        stage('installer les dependances necessaires') {
-            steps {
-                sh 'npm ci'
+
+        stage('Tests automatisés') {
+
+            // Les tests sont exécutés dans l'image officielle Cypress
+            agent {
+                docker {
+                    image 'cypress/included:14.5.4'
+                    args '-u root --entrypoint='
+                }
+            }
+
+            stages {
+
+                stage('Préparation du projet') {
+                    steps {
+                        echo 'Installation des dépendances du projet...'
+                        sh 'npm ci'
+                    }
+                }
+
+                stage('Préparation des résultats') {
+                    steps {
+                        sh '''
+                            echo "Suppression des anciens résultats..."
+
+                            rm -rf allure-results
+                            rm -rf allure-report
+
+                            mkdir -p allure-results
+
+                            echo "Répertoires de résultats prêts."
+                        '''
+                    }
+                }
+
+                stage('Lancement des tests Cypress') {
+                    steps {
+                        script {
+
+                            try {
+
+                                if (params.GENERATE_ALLURE) {
+                                    echo 'Exécution Cypress avec collecte Allure...'
+                                    sh 'npx cypress run --env allure=true'
+                                } else {
+                                    echo 'Exécution standard des tests Cypress...'
+                                    sh 'npx cypress run'
+                                }
+
+                            } finally {
+
+                                // Le rapport est généré uniquement si l'option Allure est activée
+                                if (params.GENERATE_ALLURE) {
+                                    echo 'Génération du rapport Allure...'
+
+                                    sh '''
+                                        npx allure generate allure-results \
+                                        --clean \
+                                        --output allure-report || true
+                                    '''
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
-
-        stage('lancement des tests') {
-            steps {
-                sh 'npx cypress run '
-            }
-        }
-
     }
 
     post {
+
+        // Cette partie est exécutée même si les tests échouent
         always {
-            archiveArtifacts artifacts: 'allure-results/**,allure-report/**,cypress/screenshots/**,cypress/videos/**', allowEmptyArchive: true
+            script {
+
+                if (params.GENERATE_ALLURE) {
+
+                    echo 'Archivage des résultats de test...'
+
+                    archiveArtifacts(
+                        artifacts: 'allure-results/**,allure-report/**,cypress/screenshots/**,cypress/videos/**',
+                        allowEmptyArchive: true
+                    )
+
+                    // Publication du résultat Allure dans Jenkins
+                    allure(
+                        includeProperties: false,
+                        jdk: '',
+                        results: [
+                            [path: 'allure-results']
+                        ]
+                    )
+                }
+            }
         }
     }
 }
